@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phishing URL Detection</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Base Styles */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+      line-height: 1.6;
+    }
+    a {
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Header Section */
+    header {
+      background-color: #111;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 5px;
+    }
+    header h1 {
+      font-size: 22px;
+      letter-spacing: 2px;
+    }
+    nav ul {
+      display: flex;
+    }
+    nav ul li {
+      margin: 0 15px;
+    }
+    nav ul li a {
+      color: #fff;
+      font-weight: 500;
+    }
+    nav ul li a:hover {
+      color: orange;
+    }
+
+    /* Hero Section */
+    #hero {
+      height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.7)),
+        url('/static/images/background.jpg') no-repeat center center/cover;
+    }
+    #hero .container {
+      text-align: left;
+      margin-top: -45px;
+    }
+    #hero h1 {
+      font-size: 48px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    #hero p {
+      font-size: 20px;
+      margin-bottom: 30px;
+    }
+    .btn {
+      background: orange;
+      color: #fff;
+      padding: 12px 30px;
+      border-radius: 10px;
+      font-size: 18px;
+    }
+    .btn:hover {
+      background: #e69500;
+    }
+
+    /* URL Checking Section - Modified */
+    #url-check {
+      padding: 150px 0 160px 0; /* Increased bottom padding */
+      background-color: #111;
+    }
+    #url-check .container {
+      padding-left: 50px;
+    }
+    #url-check h2 {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+    .input-section {
+      margin-bottom: 20px;
+    }
+    input[type='text'] {
+      width: 50%;
+      padding: 12px;
+      border-radius: 25px;
+      border: none;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 25px;
+      border: none;
+      border-radius: 20px;
+      background: #fff;
+      color: #000;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #result-container {
+      margin-top: 20px;
+    }
+    #visit-btn, #force-visit-btn {
+      display: none;
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+    }
+    #visit-btn {
+      background: orange;
+      color: #fff;
+    }
+    #force-visit-btn {
+      background: red;
+      color: #fff;
+    }
+
+    /* Profile Section (Developers) */
+    #profiles {
+      padding: 50px 0;
+      background-color: #000;
+      text-align: center;
+    }
+    #profiles h2 {
+      font-size: 40px;
+      margin-bottom: 35px;
+    }
+    .profile-container {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    .profile {
+      background: #333;
+      padding: 20px;
+      border-radius: 10px;
+      width: 200px;
+      transition: transform 0.3s ease;
+    }
+    .profile:hover {
+      transform: translateY(-5px);
+    }
+    .profile img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    .profile p {
+      margin: 8px 0;
+    }
+    .name {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .ID, .GUIDE, .TEAM, .TEAM_LEADER {
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    /* About Phishing Section (Revised - Three-Column Layout) */
+    #about-phishing {
+      padding: 60px 40px;
+      background-color: #111;
+      text-align: left;
+      position: relative;
+      margin-top: 0;
+    }
+    #about-phishing .container {
+      max-width: 1000px;
+    }
+    #about-phishing h2 {
+      font-size: 36px;
+      margin-bottom: 20px;
+      color: #ffa500;
+    }
+    /* Three-column layout for phishing info */
+    #about-phishing .about-content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+    #about-phishing .info-column {
+      flex: 1;
+      min-width: 250px;
+      background: #222;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    #about-phishing .info-column h3 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #ffa500;
+    }
+    #about-phishing .info-column p {
+      font-size: 16px;
+      line-height: 1.8;
+      margin-bottom: 10px;
+    }
+    #about-phishing .cta {
+      font-size: 18px;
+      font-weight: bold;
+      padding: 0 20px;
+      margin-top: 10px;
+    }
+    /* Fact container styling */
+    .fact-container {
+      display: flex;
+      overflow: visible; /* or remove if you want a continuous scroll */
+      width: auto; /* Let the container expand to fit all facts */
+      animation: scrollFacts 15s linear infinite;
+      justify-content: flex-start;
+    }
+    
+    .fact {
+      flex-shrink: 0;
+      font-size: 16px;
+      margin: 0 30px;
+    }
+    .fact span {
+      font-size: 22px;
+      font-weight: bold;
+    }
+    @keyframes scrollFacts {
+      from {
+        transform: translateX(100%);
+      }
+      to {
+        transform: translateX(-100%);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Section -->
+  <header>
+    <div class="container header-container">
+      <h1>MALICIOUS URL DETECTOR</h1>
+      <nav>
+        <ul>
+          <li><a href="#hero">Home</a></li>
+          <li><a href="#profiles">Developers</a></li>
+          <li><a href="#url-check">Check the Site</a></li>
+          <li><a href="#about-phishing">About Phishing</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="hero">
+    <div class="container">
+      <h1>A Safer Internet Starts with a Safer Click</h1>
+      <p>
+        A moment of caution can save you from a cyber disaster.
+        <br />
+        Hackers rely on deception, and one careless click can put you at risk.
+        <br />
+        Think before you click—verify your links with Click with Caution and browse with confidence.
+      </p>
+      <a href="#url-check" class="btn">Check Here</a>
+    </div>
+  </section>
+
+  <!-- Profile Section -->
+  <section id="profiles">
+    <div class="container">
+      <h2>Our Team</h2>
+      <div class="profile-container">
+        <div class="profile">
+          <img src="/static/images/female.jpg" alt="Project Guide" />
+          <p class="GUIDE">PROJECT GUIDE</p>
+          <p class="name">MRS. N. ASWANI</p>
+          <p class="ID">Assistant Professor</p>
+        </div>
+        <div class="profile">
+          <img src="/static/images/female.jpg" alt="Team Leader" />
+          <p class="TEAM_LEADER">TEAM LEADER</p>
+          <p class="name">K. HAINDHAVI</p>
+          <p class="ID">21331A0578</p>
+        </div>
+        <div class="profile">
+          <img src="/static/images/male.jpg" alt="Team Member" />
+          <p class="TEAM">TEAM MEMBER</p>
+          <p class="name">J. UDAY</p>
+          <p class="ID">21331A0568</p>
+        </div>
+        <div class="profile">
+          <img src="/static/images/female.jpg" alt="Team Member" />
+          <p class="TEAM">TEAM MEMBER</p>
+          <p class="name">M. SEETA MAHALAKSHMI</p>
+          <p class="ID">21331A0509</p>
+        </div>
+        <div class="profile">
+          <img src="/static/images/male.jpg" alt="Team Member" />
+          <p class="TEAM">TEAM MEMBER</p>
+          <p class="name">K. AKARSH VARMA</p>
+          <p class="ID">21331A05A0</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- URL Checking Section -->
+  <section id="url-check">
+    <div class="container">
+      <h2>Check: Is It Safe to Visit?</h2>
+      <div class="input-section">
+        <input type="text" id="url-input" placeholder="Enter the URL" />
+        <button id="check-btn">Submit</button>
+      </div>
+      <div id="result-container">
+        <p id="entered-url"></p>
+        <p id="result-text"></p>
+        <a id="visit-btn" href="#" target="_blank" class="visit-button">Go to this site</a>
+        <a id="force-visit-btn" href="#" target="_blank" class="visit-button" style="display: none; background: red;">Still Want to Visit?</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Phishing Section (Revised, Three-Column Layout) -->
+  <section id="about-phishing">
+    <div class="container">
+      <h2>Unmasking Phishing</h2>
+      <div class="about-content">
+        <div class="info-column">
+          <h3>What is Phishing?</h3>
+          <p>
+            Phishing is a cyberattack technique where attackers impersonate trusted entities to trick you into divulging sensitive information—such as passwords, credit card numbers, or social security data.
+          </p>
+        </div>
+        <div class="info-column">
+          <h3>Consequences</h3>
+          <p>
+            Falling victim to phishing can result in identity theft, significant financial loss, and unauthorized access to your personal and professional accounts, impacting your reputation and security.
+          </p>
+        </div>
+        <div class="info-column">
+          <h3>How Our Tool Helps</h3>
+          <p>
+            Our tool harnesses advanced machine learning to scrutinize URLs in real time, identifying subtle warning signs and preventing you from accessing dangerous sites before you click.
+          </p>
+        </div>
+      </div>
+      <p class="cta">
+        Stay vigilant, stay secure—learn to spot phishing and protect your digital life.
+      </p>
+      <div class="fact-container">
+        <div class="fact"><span>Tip:</span> Always verify the URL before entering sensitive information.</div>
+        <div class="fact"><span>Note:</span> Cyber threats evolve rapidly—keep your defenses updated.</div>
+        <div class="fact"><span>Remember:</span> Your awareness is your best protection.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JavaScript -->
+  <script>
+    const safeDomains = /\.(com|org|net|edu|in)$/;
+    document.getElementById("check-btn").addEventListener("click", function () {
+      let urlInput = document.getElementById("url-input").value.trim();
+      let resultText = document.getElementById("result-text");
+      let visitBtn = document.getElementById("visit-btn");
+      let forceVisitBtn = document.getElementById("force-visit-btn");
+      if (!urlInput) {
+        resultText.textContent = "Please enter a URL!";
+        visitBtn.style.display = "none";
+        forceVisitBtn.style.display = "none";
+        return;
+      }
+      try {
+        let hostname = new URL(urlInput).hostname;
+        let isSafe = safeDomains.test(hostname);
+        if (isSafe) {
+          resultText.textContent = "✅ Website is 100% safe to use...";
+          visitBtn.href = urlInput;
+          visitBtn.style.display = "inline-block";
+          forceVisitBtn.style.display = "none";
+        } else {
+          resultText.textContent = "⚠ Warning! This website might be unsafe.";
+          visitBtn.style.display = "none";
+          forceVisitBtn.href = urlInput;
+          forceVisitBtn.style.display = "inline-block";
+        }
+      } catch (error) {
+        resultText.textContent = "❌ Invalid URL!";
+        visitBtn.style.display = "none";
+        forceVisitBtn.style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>
